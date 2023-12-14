@@ -2,11 +2,11 @@ package dk.lyngby.controller.impl;
 
 import dk.lyngby.config.ApplicationConfig;
 import dk.lyngby.config.HibernateConfig;
-import dk.lyngby.dto.HotelDto;
-import dk.lyngby.dto.RoomDto;
-import dk.lyngby.model.Hotel;
+import dk.lyngby.dto.DiaryDTO;
+import dk.lyngby.dto.PageDTO;
+import dk.lyngby.model.Diary;
 import dk.lyngby.model.Role;
-import dk.lyngby.model.Room;
+import dk.lyngby.model.Page;
 import dk.lyngby.model.User;
 import io.javalin.Javalin;
 import io.restassured.http.ContentType;
@@ -28,12 +28,12 @@ class HotelControllerTest
 {
     private static Javalin app;
     private static final String BASE_URL = "http://localhost:7777/api/v1";
-    private static HotelController hotelController;
+    private static DiaryController hotelController;
     private static EntityManagerFactory emfTest;
     private static Object adminToken;
     private static Object userToken;
 
-    private static Hotel h1, h2;
+    private static Diary h1, h2;
     private static User user, admin;
     private static Role userRole, adminRole;
 
@@ -42,7 +42,7 @@ class HotelControllerTest
     {
         HibernateConfig.setTest(true);
         emfTest = HibernateConfig.getEntityManagerFactory();
-        hotelController = new HotelController();
+        hotelController = new DiaryController();
         app = Javalin.create();
         ApplicationConfig.startServer(app, 7777);
 
@@ -72,24 +72,24 @@ class HotelControllerTest
     @BeforeEach
     void setUp()
     {
-        Set<Room> calRooms = getCalRooms();
-        Set<Room> hilRooms = getBatesRooms();
+        Set<Page> calRooms = getCalRooms();
+        Set<Page> hilRooms = getBatesRooms();
 
         try (var em = emfTest.createEntityManager())
         {
             em.getTransaction().begin();
 
             // Delete all rows
-            em.createQuery("DELETE FROM Room r").executeUpdate();
-            em.createQuery("DELETE FROM Hotel h").executeUpdate();
+            em.createQuery("DELETE FROM Page r").executeUpdate();
+            em.createQuery("DELETE FROM Diary h").executeUpdate();
 
             // Reset sequence
             em.createNativeQuery("ALTER SEQUENCE room_room_id_seq RESTART WITH 1").executeUpdate();
             em.createNativeQuery("ALTER SEQUENCE hotel_hotel_id_seq RESTART WITH 1").executeUpdate();
 
             // Insert test data for hotels and rooms
-            h1 = new Hotel("Hotel California", "California", Hotel.HotelType.LUXURY);
-            h2 = new Hotel("Bates Motel", "Lyngby", Hotel.HotelType.STANDARD);
+            h1 = new Diary("Hotel California", "California", Diary.HotelType.LUXURY);
+            h2 = new Diary("Bates Motel", "Lyngby", Diary.HotelType.STANDARD);
             h1.setRooms(calRooms);
             h2.setRooms(hilRooms);
             em.persist(h1);
@@ -124,7 +124,7 @@ class HotelControllerTest
     void readAll()
     {
         // Given -> When -> Then
-        List<HotelDto> hotelDtoList =
+        List<DiaryDTO> hotelDtoList =
                 given()
                         .contentType("application/json")
                         .when()
@@ -132,10 +132,10 @@ class HotelControllerTest
                         .then()
                         .assertThat()
                         .statusCode(HttpStatus.OK_200)  // could also just be 200
-                        .extract().body().jsonPath().getList("", HotelDto.class);
+                        .extract().body().jsonPath().getList("", DiaryDTO.class);
 
-        HotelDto h1DTO = new HotelDto(h1);
-        HotelDto h2DTO = new HotelDto(h2);
+        DiaryDTO h1DTO = new DiaryDTO(h1);
+        DiaryDTO h2DTO = new DiaryDTO(h2);
 
         assertEquals(hotelDtoList.size(), 2);
         assertThat(hotelDtoList, containsInAnyOrder(h1DTO, h2DTO));
@@ -144,14 +144,14 @@ class HotelControllerTest
     @Test
     void create()
     {
-        Hotel h3 = new Hotel("Cab-inn", "Østergade 2", Hotel.HotelType.BUDGET);
-        Room r1 = new Room(117, new BigDecimal(4500), Room.RoomType.SINGLE);
-        Room r2 = new Room(118, new BigDecimal(2300), Room.RoomType.DOUBLE);
+        Diary h3 = new Diary("Cab-inn", "Østergade 2", Diary.HotelType.BUDGET);
+        Page r1 = new Page(117, new BigDecimal(4500), Page.RoomType.SINGLE);
+        Page r2 = new Page(118, new BigDecimal(2300), Page.RoomType.DOUBLE);
         h3.addRoom(r1);
         h3.addRoom(r2);
-        HotelDto newHotel = new HotelDto(h3);
+        DiaryDTO newHotel = new DiaryDTO(h3);
 
-        List<RoomDto> roomDtos =
+        List<PageDTO> roomDtos =
                 given()
                         .header("Authorization", adminToken)
                         .contentType(ContentType.JSON)
@@ -165,9 +165,9 @@ class HotelControllerTest
                         .body("hotelAddress", equalTo("Østergade 2"))
                         .body("hotelType", equalTo("BUDGET"))
                         .body("rooms", hasSize(2))
-                        .extract().body().jsonPath().getList("rooms", RoomDto.class);
+                        .extract().body().jsonPath().getList("rooms", PageDTO.class);
 
-        assertThat(roomDtos, containsInAnyOrder(new RoomDto(r1), new RoomDto(r2)));
+        assertThat(roomDtos, containsInAnyOrder(new PageDTO(r1), new PageDTO(r2)));
     }
 
     @Test
@@ -175,7 +175,7 @@ class HotelControllerTest
     {
         // Update the Bates Motel to luxury
 
-        HotelDto updateHotel = new HotelDto("Bates Motel", "Lyngby", Hotel.HotelType.LUXURY);
+        DiaryDTO updateHotel = new DiaryDTO("Bates Motel", "Lyngby", Diary.HotelType.LUXURY);
         given()
                 .header("Authorization", adminToken)
                 .contentType(ContentType.JSON)
@@ -215,30 +215,30 @@ class HotelControllerTest
     }
 
     @NotNull
-    private static Set<Room> getCalRooms()
+    private static Set<Page> getCalRooms()
     {
-        Room r100 = new Room(100, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r101 = new Room(101, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r102 = new Room(102, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r103 = new Room(103, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r104 = new Room(104, new BigDecimal(3200), Room.RoomType.DOUBLE);
-        Room r105 = new Room(105, new BigDecimal(4500), Room.RoomType.SUITE);
+        Page r100 = new Page(100, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r101 = new Page(101, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r102 = new Page(102, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r103 = new Page(103, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r104 = new Page(104, new BigDecimal(3200), Page.RoomType.DOUBLE);
+        Page r105 = new Page(105, new BigDecimal(4500), Page.RoomType.SUITE);
 
-        Room[] roomArray = {r100, r101, r102, r103, r104, r105};
+        Page[] roomArray = {r100, r101, r102, r103, r104, r105};
         return Set.of(roomArray);
     }
 
     @NotNull
-    private static Set<Room> getBatesRooms()
+    private static Set<Page> getBatesRooms()
     {
-        Room r111 = new Room(111, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r112 = new Room(112, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r113 = new Room(113, new BigDecimal(2520), Room.RoomType.SINGLE);
-        Room r114 = new Room(114, new BigDecimal(2520), Room.RoomType.DOUBLE);
-        Room r115 = new Room(115, new BigDecimal(3200), Room.RoomType.DOUBLE);
-        Room r116 = new Room(116, new BigDecimal(4500), Room.RoomType.SUITE);
+        Page r111 = new Page(111, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r112 = new Page(112, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r113 = new Page(113, new BigDecimal(2520), Page.RoomType.SINGLE);
+        Page r114 = new Page(114, new BigDecimal(2520), Page.RoomType.DOUBLE);
+        Page r115 = new Page(115, new BigDecimal(3200), Page.RoomType.DOUBLE);
+        Page r116 = new Page(116, new BigDecimal(4500), Page.RoomType.SUITE);
 
-        Room[] roomArray = {r111, r112, r113, r114, r115, r116};
+        Page[] roomArray = {r111, r112, r113, r114, r115, r116};
         return Set.of(roomArray);
     }
 

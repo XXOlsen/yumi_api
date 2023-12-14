@@ -1,6 +1,6 @@
 package dk.lyngby.routes;
 
-import dk.lyngby.controller.impl.RoomController;
+import dk.lyngby.controller.impl.PageController;
 import dk.lyngby.security.RouteRoles;
 import io.javalin.apibuilder.EndpointGroup;
 
@@ -8,7 +8,7 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class RoomRoute {
 
-    private final RoomController roomController = new RoomController();
+    private final PageController roomController = new PageController();
 
     protected EndpointGroup getRoutes() {
 

@@ -9,15 +9,15 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 
-public class UserDao implements IDao<User, String> {
+public class UserDAO implements IDao<User, String> {
 
-    private static UserDao instance;
+    private static UserDAO instance;
     private static EntityManagerFactory emf;
 
-    public static UserDao getInstance(EntityManagerFactory _emf) {
+    public static UserDAO getInstance(EntityManagerFactory _emf) {
         if (instance == null) {
             emf = _emf;
-            instance = new UserDao();
+            instance = new UserDAO();
         }
         return instance;
     }
@@ -36,12 +36,12 @@ public class UserDao implements IDao<User, String> {
         }
     }
 
-    public User registerUser(String username, String password, String user_role) throws AuthorizationException {
+    public User registerUser(String username, String userEmail, String password, String user_role) throws AuthorizationException {
 
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
-            User user = new User(username, password);
+            User user = new User(username, userEmail, password);
             Role role = em.find(Role.class, user_role);
 
             if (role == null) {
@@ -98,6 +98,7 @@ public class UserDao implements IDao<User, String> {
             em.getTransaction().begin();
             User userToUpdate = em.find(User.class, userName);
             userToUpdate.setUsername(user.getUsername());
+            userToUpdate.setUserEmail(user.getUserEmail());
             userToUpdate.setUserPassword(user.getUserPassword());
             em.getTransaction().commit();
             return userToUpdate;

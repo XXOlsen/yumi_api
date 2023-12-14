@@ -2,21 +2,21 @@ package dk.lyngby.controller.impl;
 
 import dk.lyngby.config.HibernateConfig;
 import dk.lyngby.controller.IController;
-import dk.lyngby.dao.impl.HotelDao;
-import dk.lyngby.dto.HotelDto;
-import dk.lyngby.model.Hotel;
+import dk.lyngby.dao.impl.DiaryDAO;
+import dk.lyngby.dto.DiaryDTO;
+import dk.lyngby.model.Diary;
 import io.javalin.http.Context;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 
-public class HotelController implements IController<Hotel, Integer> {
+public class DiaryController implements IController<Diary, Integer> {
 
-    private final HotelDao dao;
+    private final DiaryDAO dao;
 
-    public HotelController() {
+    public DiaryController() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
-        this.dao = HotelDao.getInstance(emf);
+        this.dao = DiaryDAO.getInstance(emf);
     }
 
     @Override
@@ -24,37 +24,37 @@ public class HotelController implements IController<Hotel, Integer> {
         // request
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
         // entity
-        Hotel hotel = dao.read(id);
+        Diary diary = dao.read(id);
         // dto
-        HotelDto hotelDto = new HotelDto(hotel);
+        DiaryDTO diaryDto = new DiaryDTO(diary);
         // response
         ctx.res().setStatus(200);
-        ctx.json(hotelDto, HotelDto.class);
+        ctx.json(diaryDto, DiaryDTO.class);
     }
 
     @Override
     public void readAll(Context ctx) {
         // entity
-        List<Hotel> hotels = dao.readAll();
+        List<Diary> diaries = dao.readAll();
         // dto
-        List<HotelDto> hotelDtos = HotelDto.toHotelDTOList(hotels);
+        List<DiaryDTO> diaryDtos = DiaryDTO.toDiaryDTOList(diaries);
         // response
         ctx.res().setStatus(200);
-        ctx.json(hotelDtos, HotelDto.class);
+        ctx.json(diaries, DiaryDTO.class);
     }
 
     @Override
     public void create(Context ctx) {
         // request
         //Hotel jsonRequest = validateEntity(ctx);
-        Hotel jsonRequest = ctx.bodyAsClass(Hotel.class);
+        Diary jsonRequest = ctx.bodyAsClass(Diary.class);
         // entity
-        Hotel hotel = dao.create(jsonRequest);
+        Diary diary = dao.create(jsonRequest);
         // dto
-        HotelDto hotelDto = new HotelDto(hotel);
+        DiaryDTO diaryDto = new DiaryDTO(diary);
         // response
         ctx.res().setStatus(201);
-        ctx.json(hotelDto, HotelDto.class);
+        ctx.json(diaryDto, DiaryDTO.class);
     }
 
     @Override
@@ -62,12 +62,12 @@ public class HotelController implements IController<Hotel, Integer> {
         // request
         int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
         // entity
-        Hotel update = dao.update(id, validateEntity(ctx));
+        Diary update = dao.update(id, validateEntity(ctx));
         // dto
-        HotelDto hotelDto = new HotelDto(update);
+        DiaryDTO diaryDto = new DiaryDTO(update);
         // response
         ctx.res().setStatus(200);
-        ctx.json(hotelDto, Hotel.class);
+        ctx.json(diaryDto, Diary.class);
     }
 
     @Override
@@ -86,11 +86,10 @@ public class HotelController implements IController<Hotel, Integer> {
     }
 
     @Override
-    public Hotel validateEntity(Context ctx) {
-        return ctx.bodyValidator(Hotel.class)
-                .check( h -> h.getHotelAddress() != null && !h.getHotelAddress().isEmpty(), "Hotel address must be set")
-                .check( h -> h.getHotelName() != null && !h.getHotelName().isEmpty(), "Hotel name must be set")
-                .check( h -> h.getHotelType() != null, "Hotel type must be set")
+    public Diary validateEntity(Context ctx) {
+        return ctx.bodyValidator(Diary.class)
+                .check( d -> d.getDiaryName() != null && !d.getDiaryName().isEmpty(), "Diary name must be set")
+                .check( d -> d.getDiaryPage() != null, "Diary page must be set")
                 .get();
     }
 

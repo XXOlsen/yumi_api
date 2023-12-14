@@ -3,7 +3,7 @@ package dk.lyngby.controller.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.lyngby.config.HibernateConfig;
-import dk.lyngby.dao.impl.UserDao;
+import dk.lyngby.dao.impl.UserDAO;
 import dk.lyngby.exception.ApiException;
 import dk.lyngby.exception.AuthorizationException;
 import dk.lyngby.model.User;
@@ -15,17 +15,17 @@ import java.util.Set;
 
 public class UserController {
 
-    private final UserDao userDao;
+    private final UserDAO userDao;
     private final TokenFactory tokenFactory = TokenFactory.getInstance();
 
     public UserController() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
-        userDao = UserDao.getInstance(emf);
+        userDao = UserDAO.getInstance(emf);
     }
 
     public void login(Context ctx) throws ApiException, AuthorizationException {
         String[] userInfos = getUserInfos(ctx, true);
-        User user = getVerfiedOrRegisterUser(userInfos[0], userInfos[1], "", false);
+        User user = getVerfiedOrRegisterUser(userInfos[0], userInfos[1], userInfos[2], "", false);
         String token = getToken(userInfos[0], user.getRolesAsStrings());
 
         // Create response
@@ -35,7 +35,7 @@ public class UserController {
 
     public void register(Context ctx) throws ApiException, AuthorizationException {
         String[] userInfos = getUserInfos(ctx, false);
-        User user = getVerfiedOrRegisterUser(userInfos[0], userInfos[1], userInfos[2], true);
+        User user = getVerfiedOrRegisterUser(userInfos[0], userInfos[1], userInfos[2], userInfos[3], true);
         String token = getToken(userInfos[0], user.getRolesAsStrings());
 
         // Create response
@@ -56,8 +56,8 @@ public class UserController {
         return tokenFactory.parseJsonObject(request, tryLogin);
     }
 
-    private User getVerfiedOrRegisterUser(String username, String password, String role, boolean isCreate) throws AuthorizationException {
-        return isCreate ? userDao.registerUser(username, password, role) : userDao.getVerifiedUser(username, password);
+    private User getVerfiedOrRegisterUser(String username, String userEmail, String password, String role, boolean isCreate) throws AuthorizationException {
+        return isCreate ? userDao.registerUser(username, userEmail, password, role) : userDao.getVerifiedUser(username, password);
     }
 
     private String getToken(String username, Set<String> userRoles) throws ApiException {

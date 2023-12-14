@@ -26,8 +26,16 @@ public class User implements Serializable {
     private String username;
 
     @Basic(optional = false)
+    @Column(name = "user_email", length = 255, nullable = false)
+    private String userEmail;
+
+    @Basic(optional = false)
     @Column(name = "user_password", length = 255, nullable = false)
     private String userPassword;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "diary_id", referencedColumnName = "diary_id")
+    private Diary diary;
 
     @JoinTable(name = "user_roles", joinColumns = {
             @JoinColumn(name = "user_name", referencedColumnName = "user_name")}, inverseJoinColumns = {
@@ -35,8 +43,9 @@ public class User implements Serializable {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roleList = new LinkedHashSet<>();
 
-    public User(String username, String userPassword) {
+    public User(String username, String userEmail, String userPassword) {
         this.username = username;
+        this.userEmail = userEmail;
         this.userPassword = BCrypt.hashpw(userPassword, BCrypt.gensalt());
     }
 
@@ -60,6 +69,10 @@ public class User implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public void addRole(Role userRole) {
