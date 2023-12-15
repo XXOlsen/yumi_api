@@ -3,10 +3,14 @@ package dk.lyngby.config;
 
 import dk.lyngby.model.Diary;
 import dk.lyngby.model.Diarypage;
+import dk.lyngby.model.Role;
+import dk.lyngby.model.User;
 import jakarta.persistence.EntityManagerFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 public class Populate {
@@ -14,43 +18,59 @@ public class Populate {
 
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
-        Set<Diarypage> calPages = getCalPages();
-        Set<Diarypage> hilPages = getHilPages();
-
         try (var em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Diary ?? = new Diary("Hotel California", "California", Diary.HotelType.LUXURY);
-            california.setRooms(calRooms);
-            hilton.setRooms(hilRooms);
-            em.persist(california);
-            em.persist(hilton);
+
+            User user1 = new User("user1", "user1@example.com", "1234");
+            User user2 = new User("user2", "user2@example.com", "1234");
+            User admin = new User("admin", "admin@example.com", "4321");
+
+            em.persist(user1);
+            em.persist(user2);
+            em.persist(admin);
+
+            Role roleUser = new Role("ROLE_USER");
+            Role roleAdmin = new Role("ROLE_ADMIN");
+
+            em.persist(roleUser);
+            em.persist(roleAdmin);
+
+            user1.addRole(roleUser);
+            user2.addRole(roleUser);
+            admin.addRole(roleAdmin);
+
+            Diary diaryToUser1 = new Diary(1, "About Stefan", 150);
+            Diary diaryToUser2 = new Diary(2, "School Time", 150);
+
+            em.persist(diaryToUser1);
+            em.persist(diaryToUser2);
+
+            Set<Diarypage> diary1Pages = getDiaryPagesForDiary1();
+            diaryToUser1.setPages(diary1Pages);
+
+            Set<Diarypage> diary2Pages = getDiaryPagesForDiary2();
+            diaryToUser2.setPages(diary2Pages);
+
             em.getTransaction().commit();
         }
     }
 
-    @NotNull
-    private static Set<Page> getCalRooms() {
-        Page r100 = new Page(100, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r101 = new Page(101, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r102 = new Page(102, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r103 = new Page(103, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r104 = new Page(104, new BigDecimal(3200), Page.RoomType.DOUBLE);
-        Page r105 = new Page(105, new BigDecimal(4500), Page.RoomType.SUITE);
+    private static Set<Diarypage> getDiaryPagesForDiary1() {
+        Set<Diarypage> pages = new HashSet<>();
 
-        Page[] roomArray = {r100, r101, r102, r103, r104, r105};
-        return Set.of(roomArray);
+        pages.add(new Diarypage(null, LocalDate.now(), 1, "He shine like a diamond", Diarypage.MoodType.HAPPY));
+        pages.add(new Diarypage(null, LocalDate.now().minusDays(1), 2, "Feeling magical", Diarypage.MoodType.IN_HEAVEN));
+
+        return pages;
     }
 
-    @NotNull
-    private static Set<Page> getHilRooms() {
-        Page r111 = new Page(111, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r112 = new Page(112, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r113 = new Page(113, new BigDecimal(2520), Page.RoomType.SINGLE);
-        Page r114 = new Page(114, new BigDecimal(2520), Page.RoomType.DOUBLE);
-        Page r115 = new Page(115, new BigDecimal(3200), Page.RoomType.DOUBLE);
-        Page r116 = new Page(116, new BigDecimal(4500), Page.RoomType.SUITE);
+    private static Set<Diarypage> getDiaryPagesForDiary2() {
+        Set<Diarypage> pages = new HashSet<>();
 
-        Page[] roomArray = {r111, r112, r113, r114, r115, r116};
-        return Set.of(roomArray);
+        pages.add(new Diarypage(null, LocalDate.now(), 1, "First day at school", Diarypage.MoodType.IN_HEAVEN));
+        pages.add(new Diarypage(null, LocalDate.now().minusDays(1), 2, "Overcoming challenges", Diarypage.MoodType.HAPPY));
+
+        return pages;
     }
+
 }

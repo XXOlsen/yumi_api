@@ -40,6 +40,7 @@ public class Diary {
         this.diaryPage = diaryPage;
     }
 
+
     public void setPages(Set<Diarypage> pages) {
         if(pages != null) {
             this.pages = pages;

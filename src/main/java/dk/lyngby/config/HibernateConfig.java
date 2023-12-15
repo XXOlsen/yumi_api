@@ -1,8 +1,8 @@
 package dk.lyngby.config;
 
 import dk.lyngby.model.Diary;
+import dk.lyngby.model.Diarypage;
 import dk.lyngby.model.Role;
-import dk.lyngby.model.Page;
 import dk.lyngby.model.User;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.NoArgsConstructor;
@@ -98,7 +98,7 @@ public class HibernateConfig {
 
     private static void getAnnotationConfiguration(Configuration configuration) {
         configuration.addAnnotatedClass(Diary.class);
-        configuration.addAnnotatedClass(Page.class);
+        configuration.addAnnotatedClass(Diarypage.class);
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
     }
