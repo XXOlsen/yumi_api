@@ -25,28 +25,28 @@ public class Populate {
             User user2 = new User("user2", "user2@example.com", "1234");
             User admin = new User("admin", "admin@example.com", "4321");
 
+            Role roleUser = new Role("ROLE_USER");
+            Role roleAdmin = new Role("ROLE_ADMIN");
+
+            Diary diaryToUser1 = new Diary( "About Stefan", 150);
+            Diary diaryToUser2 = new Diary("School Time", 150);
+
             em.persist(user1);
             em.persist(user2);
             em.persist(admin);
 
-            Role roleUser = new Role("ROLE_USER");
-            Role roleAdmin = new Role("ROLE_ADMIN");
-
             em.persist(roleUser);
             em.persist(roleAdmin);
+
+            em.persist(diaryToUser1);
+            em.persist(diaryToUser2);
 
             user1.addRole(roleUser);
             user2.addRole(roleUser);
             admin.addRole(roleAdmin);
 
-
-            Diary diaryToUser1 = new Diary(1, "About Stefan", 150);
-            Diary diaryToUser2 = new Diary(2, "School Time", 150);
             user1.addDiary(diaryToUser1);
             user2.addDiary(diaryToUser2);
-
-            em.persist(diaryToUser1);
-            em.persist(diaryToUser2);
 
             Set<Diarypage> diary1Pages = getDiaryPagesForDiary1();
             diaryToUser1.setPages(diary1Pages);

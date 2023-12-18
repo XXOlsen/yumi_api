@@ -40,6 +40,10 @@ public class Diary {
         this.diaryPage = diaryPage;
     }
 
+    public Diary(String diaryName, Integer diaryPage) {
+        this.diaryName = diaryName;
+        this.diaryPage = diaryPage;
+    }
 
     public void setPages(Set<Diarypage> pages) {
         if(pages != null) {
