@@ -49,6 +49,13 @@ public class User implements Serializable {
         this.userPassword = BCrypt.hashpw(userPassword, BCrypt.gensalt());
     }
 
+    public User(String username, String userEmail, String userPassword, Diary diary) {
+        this.diary = diary;
+        this.username = username;
+        this.userEmail = userEmail;
+        this.userPassword = BCrypt.hashpw(userPassword, BCrypt.gensalt());
+    }
+
     public Set<String> getRolesAsStrings() {
         if (roleList.isEmpty()) {
             return null;
@@ -78,5 +85,8 @@ public class User implements Serializable {
     public void addRole(Role userRole) {
         roleList.add(userRole);
     }
+    public void addDiary(Diary diary){this.diary = diary;}
+
+
 
 }

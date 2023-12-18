@@ -39,8 +39,11 @@ public class Populate {
             user2.addRole(roleUser);
             admin.addRole(roleAdmin);
 
+
             Diary diaryToUser1 = new Diary(1, "About Stefan", 150);
             Diary diaryToUser2 = new Diary(2, "School Time", 150);
+            user1.addDiary(diaryToUser1);
+            user2.addDiary(diaryToUser2);
 
             em.persist(diaryToUser1);
             em.persist(diaryToUser2);
