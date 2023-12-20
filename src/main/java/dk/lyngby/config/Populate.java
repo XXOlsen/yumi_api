@@ -70,7 +70,7 @@ public class Populate {
     private static Set<Diarypage> getDiaryPagesForDiary1() {
         Set<Diarypage> pages = new HashSet<>();
 
-        pages.add(new Diarypage(null, LocalDate.now(), 1, "He shine like a diamond", Diarypage.MoodType.HAPPY));
+        pages.add(new Diarypage(null, LocalDate.now(), 1, "He shines like a diamond", Diarypage.MoodType.HAPPY));
         pages.add(new Diarypage(null, LocalDate.now().minusDays(1), 2, "Feeling magical", Diarypage.MoodType.IN_HEAVEN));
 
         return pages;
